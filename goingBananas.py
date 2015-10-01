@@ -10,6 +10,9 @@ pygame.init()
 displayWidth = 600
 displayHeight = 400
 
+imageWidth = 64
+imageHeight = 55
+
 white = (255,255,255)
 
 #Create Display and setup display vars
@@ -39,6 +42,20 @@ def changeYLocation(ySpeed, y):
 	# Takes in ySpeed and computes new location 
 	return y - (ySpeed*.20)
 
+def inBarrierLR(xCoord, displayWidth, imageWidth):
+	if xCoord >= 0 and (xCoord + imageWidth) <= displayWidth:
+		isInBarrier = True
+	else:
+		isInBarrier = False
+	return isInBarrier
+
+def inBarrierUp(yCoord, displayHeight):
+	if yCoord >= 0:
+		isInBarrier = True
+	else:
+		isInBarrier = False
+	return isInBarrier
+
 # Position and other physics constants
 gravity = 1.5
 
@@ -50,7 +67,7 @@ y = initialY
 
 deltaX = 0
 
-# Var to carry if monkey is still alive
+# Var to check if monkey is still alive
 hitSnake = False
 
 while not hitSnake:
@@ -65,13 +82,20 @@ while not hitSnake:
 			elif event.key == pygame.K_RIGHT:
 				deltaX = 5
 			elif event.key == pygame.K_SPACE:
-				ySpeed = 25
-				y -= 100
+				if inBarrierUp(y-100, displayHeight):
+					ySpeed = 25
+					y -= 100
 		elif event.type == pygame.KEYUP:
 			# Key is no longer being pressed, stop changing x value
 			deltaX = 0
 	# Add the change in X to the Monkey's x
+
 	x += deltaX
+
+	# If we just left the barrier, undo that
+
+	if not inBarrierLR(x, displayWidth, imageWidth):
+		x -= deltaX
 
 	# Check to see if monkey is in air, if it is, add "gravity"
 	if inAir(y):
