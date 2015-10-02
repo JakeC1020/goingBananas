@@ -1,5 +1,6 @@
 """
 http://pythonprogramming.net/pygame-tutorial-moving-images-key-input/
+https://www.pygame.org/docs/tut/tom/games2.html
 """
 
 import pygame, time
@@ -23,9 +24,20 @@ white = (255,255,255)
 
 jungleGreen = (28, 53, 45)
 
+score = 0
+
 #Create Display and setup display vars
 gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
 pygame.display.set_caption('Going Bananas')
+
+# Background display
+background = pygame.Surface(gameDisplay.get_size())
+background = background.convert()
+background.fill(jungleGreen)
+
+# Text Setup
+font = pygame.font.Font(None, 36)
+
 
 clock = pygame.time.Clock()
 monkeyImg = pygame.image.load('monkey.png')
@@ -140,7 +152,7 @@ snakeSpeed = -5
 # Banana Vars
 bananas = []
 bananaSpeed = -2
-score = 0
+
 
 # Var to check if monkey is still alive
 hitSnake = False
@@ -175,11 +187,13 @@ while not hitSnake:
 		ySpeed = addGravity(ySpeed)
 
 	# Redraw and flip screen
-	gameDisplay.fill(jungleGreen)
-	gameDisplay.blit(vineImg, (0,0))
-	gameDisplay.blit(vineImg, (100, 0))
-	gameDisplay.blit(vine2Img, (350,0))
-	gameDisplay.blit(vine3Img, (500, 0))
+	gameDisplay.blit(background, (0,0))
+	text = font.render("Score: " + str(score), 1, (255,255,255))
+	gameDisplay.blit(text, (475, 25))
+	gameDisplay.blit(vineImg, (-25,0))
+	gameDisplay.blit(vineImg, (75, 0))
+	gameDisplay.blit(vine2Img, (275,0))
+	gameDisplay.blit(vine3Img, (375, 0))
 	# Move monkey
 	moveMonkey(x,y)
 		
