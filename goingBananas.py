@@ -16,6 +16,9 @@ imageHeight = 55
 snakeImageWidth = 64
 snakeImageHeight = 44
 
+bananaImageWidth = 64
+bananaImageHeight = 34
+
 white = (255,255,255)
 
 #Create Display and setup display vars
@@ -25,6 +28,7 @@ pygame.display.set_caption('Going Bananas')
 clock = pygame.time.Clock()
 monkeyImg = pygame.image.load('monkey.png')
 snakeImg = pygame.image.load('snake.png')
+bananaImg = pygame.image.load('banana.png')
 
 
 def moveMonkey(x,y):
@@ -33,6 +37,10 @@ def moveMonkey(x,y):
 def moveSnake(snakeDict):
 	snakeDict['x'] += snakeDict['speed']
 	gameDisplay.blit(snakeImg, (snakeDict['x'], snakeDict['y']))
+
+def moveBanana(bananaDict):
+	bananaDict['x'] += bananaDict['speed']
+	gameDisplay.blit(bananaImg, (bananaDict['x'], bananaDict['y']))
 
 def inAir(y):
 	if y < initialY:
@@ -98,6 +106,16 @@ def makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initi
 	snakes.append(snakeDict)
 	moveSnake(snakeDict)
 
+def makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, bananaSpeed, initialY):
+	bananaDict = {}
+	bananaDict['x'] = displayWidth - imageWidth
+	bananaDict['y'] = initialY
+	bananaDict['speed'] = bananaSpeed
+	bananaDict['imageWidth'] = bananaImageWidth
+	bananaDict['imageHeight'] = bananaImageHeight
+	bananas.append(bananaDict)
+	moveBanana(bananaDict)
+
 # Position and other physics constants
 gravity = 1.5
 
@@ -113,6 +131,11 @@ deltaX = 0
 tickCounter = 0
 snakes = []
 snakeSpeed = -5
+
+# Banana Vars
+bananas = []
+bananaSpeed = -2
+score = 0
 
 # Var to check if monkey is still alive
 hitSnake = False
@@ -168,14 +191,31 @@ while not hitSnake:
 	if tickCounter % 120 == 0:
 		makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initialY)
 	
+	### Enemy has been processed, do banana work
 
+	for banana in bananas:
+
+		# Check for banana collisions
+		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), banana):
+			score += 1
+			bananas.remove(banana)
+			print score
+
+		if not inBarrierLR(banana['x'], displayWidth, banana['imageWidth']):
+			bananas.remove(banana)
+
+		moveBanana(banana)
+
+	if tickCounter % 60 == 0:
+		makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, bananaSpeed, initialY)
 	
 	tickCounter += 1
+
 
 	pygame.display.flip()
 	clock.tick(60)
 
-name = input("You Lose! Thanks for Playing!")
+print("You Lose! Thanks for Playing!")
 
 pygame.quit()
 quit()
