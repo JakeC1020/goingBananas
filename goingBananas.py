@@ -12,7 +12,7 @@ displayHeight = 400
 
 imageWidth = 64
 imageHeight = 55
-
+ 
 snakeImageWidth = 64
 snakeImageHeight = 44
 
@@ -20,6 +20,8 @@ bananaImageWidth = 64
 bananaImageHeight = 34
 
 white = (255,255,255)
+
+jungleGreen = (28, 53, 45)
 
 #Create Display and setup display vars
 gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
@@ -29,6 +31,9 @@ clock = pygame.time.Clock()
 monkeyImg = pygame.image.load('monkey.png')
 snakeImg = pygame.image.load('snake.png')
 bananaImg = pygame.image.load('banana.png')
+vineImg = pygame.image.load('vine.png')
+vine2Img = pygame.image.load('vine2.png')
+vine3Img = pygame.image.load('vine3.png')
 
 
 def moveMonkey(x,y):
@@ -170,11 +175,16 @@ while not hitSnake:
 		ySpeed = addGravity(ySpeed)
 
 	# Redraw and flip screen
-	gameDisplay.fill(white)
+	gameDisplay.fill(jungleGreen)
+	gameDisplay.blit(vineImg, (0,0))
+	gameDisplay.blit(vineImg, (100, 0))
+	gameDisplay.blit(vine2Img, (350,0))
+	gameDisplay.blit(vine3Img, (500, 0))
+	# Move monkey
 	moveMonkey(x,y)
 		
 	### Monkey is done moving this cycle, do enemy work ###
-	for snake in snakes:
+	"""for snake in snakes:
 
 		# Check for snake collisions
 		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), snake):
@@ -190,7 +200,7 @@ while not hitSnake:
 	# Generate new Snakes
 	if tickCounter % 120 == 0:
 		makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initialY)
-	
+	"""
 	### Enemy has been processed, do banana work
 
 	for banana in bananas:
