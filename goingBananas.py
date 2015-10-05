@@ -8,6 +8,7 @@ Sources:
 Modified player movement code from http://pythonprogramming.net/pygame-tutorial-moving-images-key-input/ 
 Modified text display code from https://www.pygame.org/docs/tut/tom/games2.html
 Frequently accessed the Python 2 docs https://docs.python.org/2/
+All images are licensed under a public domain license, requiring no accreditation
 """
 
 import pygame
