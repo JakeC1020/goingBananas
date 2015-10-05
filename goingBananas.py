@@ -24,7 +24,7 @@ white = (255,255,255)
 
 jungleGreen = (28, 53, 45)
 
-score = 0
+
 
 #Create Display and setup display vars
 gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
@@ -40,12 +40,12 @@ font = pygame.font.Font(None, 36)
 
 
 clock = pygame.time.Clock()
-monkeyImg = pygame.image.load('monkey.png')
-snakeImg = pygame.image.load('snake.png')
-bananaImg = pygame.image.load('banana.png')
-vineImg = pygame.image.load('vine.png')
-vine2Img = pygame.image.load('vine2.png')
-vine3Img = pygame.image.load('vine3.png')
+monkeyImg = pygame.image.load('img/monkey.png')
+snakeImg = pygame.image.load('img/snake.png')
+bananaImg = pygame.image.load('img/banana.png')
+vineImg = pygame.image.load('img/vine.png')
+vine2Img = pygame.image.load('img/vine2.png')
+vine3Img = pygame.image.load('img/vine3.png')
 
 
 def moveMonkey(x,y):
@@ -133,6 +133,17 @@ def makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, bananaSpeed, i
 	bananas.append(bananaDict)
 	moveBanana(bananaDict)
 
+def getHighScore():
+	scoreFile = open('highScore.txt', 'r')
+	score = scoreFile.read()
+	scoreFile.close()
+	return score
+
+def setHighScore(newHighScore):
+	scoreFile = open('highScore.txt', 'w')
+	scoreFile.write(newHighScore)
+	scoreFile.close()
+
 # Position and other physics constants
 gravity = 1.5
 
@@ -152,6 +163,10 @@ snakeSpeed = -5
 # Banana Vars
 bananas = []
 bananaSpeed = -2
+
+# Score Vars
+score = 0
+highScore = getHighScore()
 
 
 # Var to check if monkey is still alive
@@ -188,17 +203,19 @@ while not hitSnake:
 
 	# Redraw and flip screen
 	gameDisplay.blit(background, (0,0))
-	text = font.render("Score: " + str(score), 1, (255,255,255))
-	gameDisplay.blit(text, (475, 25))
+	textScore = font.render("Score: " + str(score), 1, (255,255,255))
+	gameDisplay.blit(textScore, (475, 25))
+	textHighScore = font.render("High Score: " + str(highScore), 1, (255,255,255))
+	gameDisplay.blit(textHighScore, (415, 75))
 	gameDisplay.blit(vineImg, (-25,0))
 	gameDisplay.blit(vineImg, (75, 0))
 	gameDisplay.blit(vine2Img, (275,0))
-	gameDisplay.blit(vine3Img, (375, 0))
+	gameDisplay.blit(vine3Img, (360, 0))
 	# Move monkey
 	moveMonkey(x,y)
 		
 	### Monkey is done moving this cycle, do enemy work ###
-	"""for snake in snakes:
+	for snake in snakes:
 
 		# Check for snake collisions
 		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), snake):
@@ -214,8 +231,8 @@ while not hitSnake:
 	# Generate new Snakes
 	if tickCounter % 120 == 0:
 		makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initialY)
-	"""
-	### Enemy has been processed, do banana work
+	
+ 	### Enemy has been processed, do banana work
 
 	for banana in bananas:
 
@@ -223,7 +240,6 @@ while not hitSnake:
 		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), banana):
 			score += 1
 			bananas.remove(banana)
-			print score
 
 		if not inBarrierLR(banana['x'], displayWidth, banana['imageWidth']):
 			bananas.remove(banana)
@@ -238,6 +254,10 @@ while not hitSnake:
 
 	pygame.display.flip()
 	clock.tick(60)
+
+if score > int(highScore):
+	setHighScore(str(score))
+	print "New High Score:", score
 
 print("You Lose! Thanks for Playing!")
 
