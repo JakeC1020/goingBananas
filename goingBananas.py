@@ -1,72 +1,49 @@
 """
-http://pythonprogramming.net/pygame-tutorial-moving-images-key-input/
-https://www.pygame.org/docs/tut/tom/games2.html
+Jacob Crawford
+10/6/15
+Project #1
+This program uses the library pygame to create a game where the player (the monkey), must avoid snakes who run across the screen while collecting the bananas that also go across the screen. 
+
+Sources:
+Modified player movement code from http://pythonprogramming.net/pygame-tutorial-moving-images-key-input/ 
+Modified text display code from https://www.pygame.org/docs/tut/tom/games2.html
+Frequently accessed the Python 2 docs https://docs.python.org/2/
 """
 
-import pygame, time
+import pygame
 
-pygame.init()
+########## Game Functions ##########
 
-# Display Constants
-displayWidth = 600
-displayHeight = 400
+def drawBackground(score, highScore, backgroundColor, font, vineImg, vine2Img, vine3Img, gameDisplay):
+	gameDisplay.fill(backgroundColor)
+	textScore = font.render("Score: " + str(score), 1, (255,255,255))
+	gameDisplay.blit(textScore, (475, 25))
+	textHighScore = font.render("High Score: " + str(highScore), 1, (255,255,255))
+	gameDisplay.blit(textHighScore, (415, 75))
+	gameDisplay.blit(vineImg, (-25,0))
+	gameDisplay.blit(vineImg, (75, 0))
+	gameDisplay.blit(vine2Img, (275,0))
+	gameDisplay.blit(vine3Img, (360, 0))
 
-imageWidth = 64
-imageHeight = 55
- 
-snakeImageWidth = 64
-snakeImageHeight = 44
+def moveMonkey(monkeyDict, monkeyImg, gameDisplay):
+	gameDisplay.blit(monkeyImg, (monkeyDict['x'],monkeyDict['y']))
 
-bananaImageWidth = 64
-bananaImageHeight = 34
-
-white = (255,255,255)
-
-jungleGreen = (28, 53, 45)
-
-
-
-#Create Display and setup display vars
-gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
-pygame.display.set_caption('Going Bananas')
-
-# Background display
-background = pygame.Surface(gameDisplay.get_size())
-background = background.convert()
-background.fill(jungleGreen)
-
-# Text Setup
-font = pygame.font.Font(None, 36)
-
-
-clock = pygame.time.Clock()
-monkeyImg = pygame.image.load('img/monkey.png')
-snakeImg = pygame.image.load('img/snake.png')
-bananaImg = pygame.image.load('img/banana.png')
-vineImg = pygame.image.load('img/vine.png')
-vine2Img = pygame.image.load('img/vine2.png')
-vine3Img = pygame.image.load('img/vine3.png')
-
-
-def moveMonkey(x,y):
-	gameDisplay.blit(monkeyImg, (x,y))
-
-def moveSnake(snakeDict):
+def moveSnake(snakeDict, snakeImg, gameDisplay):
 	snakeDict['x'] += snakeDict['speed']
 	gameDisplay.blit(snakeImg, (snakeDict['x'], snakeDict['y']))
 
-def moveBanana(bananaDict):
+def moveBanana(bananaDict, bananaImg, gameDisplay):
 	bananaDict['x'] += bananaDict['speed']
 	gameDisplay.blit(bananaImg, (bananaDict['x'], bananaDict['y']))
 
-def inAir(y):
+def inAir(y, initialY):
 	if y < initialY:
 		isInAir = True
 	else:
 		isInAir = False
 	return isInAir
 
-def addGravity(ySpeed):
+def addGravity(ySpeed, gravity):
 	# Clock ticks roughly every .015ish of a second, this estimate will do for this game
 	return ySpeed - gravity
 
@@ -105,7 +82,7 @@ def isCollision(monkeyDict, snakeDict):
 		collision = False
 	return collision
 
-def getMonkeyDict(xCoord, yCoord, imageWidth, imageHeight):
+def makeMonkey(xCoord, yCoord, imageWidth, imageHeight):
 	monkeyDict = {}
 	monkeyDict['x'] = xCoord
 	monkeyDict['y']  = yCoord
@@ -115,23 +92,23 @@ def getMonkeyDict(xCoord, yCoord, imageWidth, imageHeight):
 
 def makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initialY):
 	snakeDict = {}
-	snakeDict['x'] = displayWidth - imageWidth
+	snakeDict['x'] = displayWidth - snakeImageWidth
 	snakeDict['y'] = initialY
 	snakeDict['speed'] = snakeSpeed
 	snakeDict['imageWidth'] = snakeImageWidth
 	snakeDict['imageHeight'] = snakeImageHeight
-	snakes.append(snakeDict)
-	moveSnake(snakeDict)
+	return snakeDict
+	
 
 def makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, bananaSpeed, initialY):
 	bananaDict = {}
-	bananaDict['x'] = displayWidth - imageWidth
+	bananaDict['x'] = displayWidth - bananaImageWidth
 	bananaDict['y'] = initialY
 	bananaDict['speed'] = bananaSpeed
 	bananaDict['imageWidth'] = bananaImageWidth
 	bananaDict['imageHeight'] = bananaImageHeight
-	bananas.append(bananaDict)
-	moveBanana(bananaDict)
+	return bananaDict
+	
 
 def getHighScore():
 	scoreFile = open('highScore.txt', 'r')
@@ -144,124 +121,172 @@ def setHighScore(newHighScore):
 	scoreFile.write(newHighScore)
 	scoreFile.close()
 
-# Position and other physics constants
-gravity = 1.5
+def main():
+	pygame.init()
 
-initialX = (displayWidth * .45)
-initialY = (displayHeight * .7)
+	########## Display Constants and Vars##########
+	displayWidth = 600
+	displayHeight = 400
 
-x = initialX
-y = initialY
+	monkeyImageWidth = 64
+	monkeyImageHeight = 55
+	 
+	snakeImageWidth = 64
+	snakeImageHeight = 44
 
-deltaX = 0
+	bananaImageWidth = 64
+	bananaImageHeight = 34
 
-# Enemy Vars
-tickCounter = 0
-snakes = []
-snakeSpeed = -5
+	white = (255,255,255)
 
-# Banana Vars
-bananas = []
-bananaSpeed = -2
-
-# Score Vars
-score = 0
-highScore = getHighScore()
+	jungleGreen = (28, 53, 45)
 
 
-# Var to check if monkey is still alive
-hitSnake = False
+	#Create Display and setup display vars
+	gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
+	pygame.display.set_caption('Going Bananas')
 
-while not hitSnake:
-	for event in pygame.event.get():
-		# Death Event 
-		if event.type == pygame.QUIT:
-			hitSnake = True
-		elif event.type == pygame.KEYDOWN:
-			# Key has been pressed, see which it is and act on it
-			if event.key == pygame.K_LEFT:	
-				deltaX = -5
-			elif event.key == pygame.K_RIGHT:
-				deltaX = 5
-			elif event.key == pygame.K_SPACE:
-				if inBarrierUp(y-100, displayHeight):
-					ySpeed = 25
-					y -= 100
-		elif event.type == pygame.KEYUP:
-			# Key is no longer being pressed, stop changing x value
-			deltaX = 0
-	# Add the change in X to the Monkey's x
-	x += deltaX
-	# If we just left the barrier, undo that
-	if not inBarrierLR(x, displayWidth, imageWidth):
-		x -= deltaX
+	# Text Setup
+	font = pygame.font.Font(None, 36)
 
-	# Check to see if monkey is in air, if it is, add "gravity"
-	if inAir(y):
-		y = changeYLocation(ySpeed, y)
-		ySpeed = addGravity(ySpeed)
+	clock = pygame.time.Clock()
+	monkeyImg = pygame.image.load('img/monkey.png')
+	snakeImg = pygame.image.load('img/snake.png')
+	bananaImg = pygame.image.load('img/banana.png')
+	vineImg = pygame.image.load('img/vine.png')
+	vine2Img = pygame.image.load('img/vine2.png')
+	vine3Img = pygame.image.load('img/vine3.png')
 
-	# Redraw and flip screen
-	gameDisplay.blit(background, (0,0))
-	textScore = font.render("Score: " + str(score), 1, (255,255,255))
-	gameDisplay.blit(textScore, (475, 25))
-	textHighScore = font.render("High Score: " + str(highScore), 1, (255,255,255))
-	gameDisplay.blit(textHighScore, (415, 75))
-	gameDisplay.blit(vineImg, (-25,0))
-	gameDisplay.blit(vineImg, (75, 0))
-	gameDisplay.blit(vine2Img, (275,0))
-	gameDisplay.blit(vine3Img, (360, 0))
-	# Move monkey
-	moveMonkey(x,y)
+	########## Game Constants and Vars ##########
+
+	# Physics vars
+
+	initialX = (displayWidth * .45)
+	initialY = (displayHeight * .7)
+
+	X_SPEED = 5
+	Y_SPEED = 25
+	gravity = 1.5
+
+	JUMP_HEIGHT = 100
+
+	# Initialize speed vars
+	xSpeed = 0
+	ySpeed = 0
+
+	# Enemy vars
+	tickCounter = 0
+	snakes = []
+	SNAKE_SPEED = -5
+	SNAKE_INTERVAL = 120
+
+	# Banana vars
+	bananas = []
+	BANANA_SPEED = -2
+	BANANA_INTERVAL = 60
+
+	# Score vars
+	score = 0
+	highScore = getHighScore()
+
+
+	# Var to check if monkey is still alive
+	hitSnake = False
+
+	# Make our monkey and start playing
+	monkey = makeMonkey(initialX, initialY, monkeyImageWidth, monkeyImageHeight)
+
+	while not hitSnake:
+		# Set up the background
+		drawBackground(score, highScore, jungleGreen, font, vineImg, vine2Img, vine3Img, gameDisplay)
+
+		########## Monkey (Player) movement ##########
+		for event in pygame.event.get():
+			# Death Event 
+			if event.type == pygame.QUIT:
+				hitSnake = True
+			elif event.type == pygame.KEYDOWN:
+				# Key has been pressed, see which it is and act on it
+				if event.key == pygame.K_LEFT:	
+					xSpeed = -X_SPEED
+				elif event.key == pygame.K_RIGHT:
+					xSpeed = X_SPEED
+				elif event.key == pygame.K_SPACE and inBarrierUp(monkey['y']-JUMP_HEIGHT, displayHeight):
+					ySpeed = Y_SPEED
+					monkey['y'] -= JUMP_HEIGHT
+			elif event.type == pygame.KEYUP:
+				# Key is no longer being pressed, stop changing x value
+				xSpeed = 0
+
+		# Add the change in X to the Monkey's x
+		monkey['x'] += xSpeed
+
+		# If we just left the barrier, undo that
+		if not inBarrierLR(monkey['x'], displayWidth, monkeyImageWidth):
+			monkey['x'] -= xSpeed
+
+		# Check to see if monkey is in air, if it is, add "gravity"
+		if inAir(monkey['y'], initialY):
+			monkey['y'] = changeYLocation(ySpeed, monkey['y'])
+			ySpeed = addGravity(ySpeed, gravity)
+
+		# Move monkey
+		moveMonkey(monkey, monkeyImg, gameDisplay)
+			
+		########## Monkey is done moving this cycle, do enemy work ##########
+
+		for snake in snakes:
+			# Check for snake collisions
+			if isCollision(monkey, snake):
+				# User hit snake, end game
+				hitSnake = True
+
+			# Move snake
+			moveSnake(snake, snakeImg, gameDisplay)
+
+			# Clean up old snakes
+			if not inBarrierLR(snake['x'], displayWidth, snake['imageWidth']):
+				# Snake is off screen
+				snakes.remove(snake)
+
+		# Generate new snakes
+		if tickCounter % SNAKE_INTERVAL == 0:
+			snakes.append(makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, SNAKE_SPEED, initialY))
 		
-	### Monkey is done moving this cycle, do enemy work ###
-	for snake in snakes:
+	 	########## Enemy has been processed, do banana work ##########
 
-		# Check for snake collisions
-		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), snake):
-			# User hit snake, end game
-			hitSnake = True
+		for banana in bananas:
+			# Check for banana collisions
+			if isCollision(monkey, banana):
+				score += 1
+				bananas.remove(banana)
 
-		# Move snake
-		moveSnake(snake)
-	# Clean up old snakes
-		if not inBarrierLR(snake['x'], displayWidth, snake['imageWidth']):
-			# Snake is off screen
-			snakes.remove(snake)
-	# Generate new Snakes
-	if tickCounter % 120 == 0:
-		makeSnake(displayWidth, snakeImageWidth, snakeImageHeight, snakeSpeed, initialY)
-	
- 	### Enemy has been processed, do banana work
+			# Move banana
+			moveBanana(banana, bananaImg, gameDisplay)	
 
-	for banana in bananas:
+			# Clean up old bananas
+			if not inBarrierLR(banana['x'], displayWidth, banana['imageWidth']):
+				# Banana is off screen
+				bananas.remove(banana)
 
-		# Check for banana collisions
-		if isCollision(getMonkeyDict(x, y, imageWidth, imageHeight), banana):
-			score += 1
-			bananas.remove(banana)
+		# Generate new bananas
+		if tickCounter % BANANA_INTERVAL == 0:
+			bananas.append(makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, BANANA_SPEED, initialY))
 
-		if not inBarrierLR(banana['x'], displayWidth, banana['imageWidth']):
-			bananas.remove(banana)
+		tickCounter += 1
 
-		moveBanana(banana)
+		pygame.display.flip()
+		clock.tick(60)
 
-	if tickCounter % 60 == 0:
-		makeBanana(displayWidth, bananaImageWidth, bananaImageHeight, bananaSpeed, initialY)
-	
-	tickCounter += 1
+	########## Post Game Actions ##########
 
+	if score > int(highScore):
+		setHighScore(str(score))
+		print "New High Score:", score
 
-	pygame.display.flip()
-	clock.tick(60)
+	print("You Lose! Thanks for Playing!")
 
-if score > int(highScore):
-	setHighScore(str(score))
-	print "New High Score:", score
+	pygame.quit()
+	quit()
 
-print("You Lose! Thanks for Playing!")
-
-pygame.quit()
-quit()
-
-
+main()
