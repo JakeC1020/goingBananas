@@ -1,7 +1,7 @@
 """
-Jacob Crawford
+Jacob Crawford 
 10/6/15
-Project #1
+Project #1 (https://github.com/JakeC1020/goingBananas)
 This program uses the library pygame to create a game where the player (the monkey), must avoid snakes who run across the screen while collecting the bananas that also go across the screen. 
 
 Sources:
@@ -142,10 +142,12 @@ def main():
 
 	jungleGreen = (28, 53, 45)
 
+	caption = 'Going Bananas'
+
 
 	#Create Display and setup display vars
 	gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
-	pygame.display.set_caption('Going Bananas')
+	pygame.display.set_caption(caption)
 
 	# Text Setup
 	font = pygame.font.Font(None, 36)
@@ -241,6 +243,7 @@ def main():
 			if isCollision(monkey, snake):
 				# User hit snake, end game
 				hitSnake = True
+				print "You lose!"
 
 			# Move snake
 			moveSnake(snake, snakeImg, gameDisplay)
@@ -285,7 +288,7 @@ def main():
 		setHighScore(str(score))
 		print "New High Score:", score
 
-	print("You Lose! Thanks for Playing!")
+	print("Thanks for Playing!")
 
 	pygame.quit()
 	quit()
